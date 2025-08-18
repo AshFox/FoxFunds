@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.8.1
+  sdk: ">=3.8.0 <4.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -46,6 +46,8 @@ dependencies:
   # Charts
   fl_chart: ^0.68.0
 
+
+
   # UI/UX
   google_fonts: ^6.2.1
   flutter_svg: ^2.0.10+1
@@ -56,6 +58,15 @@ dependencies:
   shared_preferences: ^2.2.3
   http: ^1.2.1
   uuid: ^4.4.0
+  package_info_plus: ^8.0.2
+  
+  # Export functionality
+  pdf: ^3.10.7
+  open_file: ^3.3.2
+  file_picker: ^8.0.0+1
+  flutter_colorpicker: ^1.1.0
+  flutter_local_notifications: ^19.4.0
+  flutter_phoenix: ^1.1.1
 
 dev_dependencies:
   flutter_test:

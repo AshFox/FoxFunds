@@ -1,19 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:foxfunds/models/jar.dart';
+import 'package:foxfunds/models/goal.dart';
 import 'package:foxfunds/services/database_service.dart';
 import 'package:uuid/uuid.dart';
 
-class AddJarScreen extends StatefulWidget {
-  const AddJarScreen({super.key});
+class AddGoalScreen extends StatefulWidget {
+  const AddGoalScreen({super.key, this.goal});
+
+  final Goal? goal;
 
   @override
-  _AddJarScreenState createState() => _AddJarScreenState();
+  _AddGoalScreenState createState() => _AddGoalScreenState();
 }
 
-class _AddJarScreenState extends State<AddJarScreen> {
+class _AddGoalScreenState extends State<AddGoalScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _targetAmountController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.goal != null) {
+      _nameController.text = widget.goal!.name;
+      _targetAmountController.text = widget.goal!.targetAmount.toStringAsFixed(0);
+    }
+  }
 
   @override
   void dispose() {
@@ -24,22 +35,34 @@ class _AddJarScreenState extends State<AddJarScreen> {
 
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      final newJar = Jar(
-        id: const Uuid().v4(),
-        name: _nameController.text,
-        targetAmount: double.parse(_targetAmountController.text),
-      );
+      final name = _nameController.text;
+      final target = double.parse(_targetAmountController.text);
 
-      await DatabaseService.instance.createJar(newJar);
+      if (widget.goal == null) {
+        final newGoal = Goal(
+          id: const Uuid().v4(),
+          name: name,
+          targetAmount: target,
+        );
+        await DatabaseService.instance.createGoal(newGoal);
+      } else {
+        final updated = widget.goal!.copyWith(
+          name: name,
+          targetAmount: target,
+        );
+        await DatabaseService.instance.updateGoal(updated);
+      }
+      // ignore: use_build_context_synchronously
       Navigator.pop(context);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isEditing = widget.goal != null;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add a New Jar'),
+        title: Text(isEditing ? 'Edit Goal' : 'Add a New Goal'),
       ),
       body: Form(
         key: _formKey,
@@ -49,7 +72,7 @@ class _AddJarScreenState extends State<AddJarScreen> {
             children: [
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Jar Name'),
+                decoration: const InputDecoration(labelText: 'Goal Name'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a name';
@@ -74,7 +97,7 @@ class _AddJarScreenState extends State<AddJarScreen> {
               const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: _submitForm,
-                child: const Text('Create Jar'),
+                child: Text(isEditing ? 'Save Changes' : 'Create Goal'),
               ),
             ],
           ),
@@ -82,4 +105,4 @@ class _AddJarScreenState extends State<AddJarScreen> {
       ),
     );
   }
-} 
+}

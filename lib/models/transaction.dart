@@ -1,7 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-import 'category.dart';
-
 @immutable
 class Transaction {
   const Transaction({
@@ -10,7 +8,7 @@ class Transaction {
     required this.categoryId,
     required this.date,
     this.description,
-    this.jarId,
+    this.goalId,
   });
 
   final String id;
@@ -18,7 +16,7 @@ class Transaction {
   final String categoryId;
   final DateTime date;
   final String? description;
-  final String? jarId; // if the transaction is to/from a jar
+  final String? goalId; // if the transaction is to/from a goal
 
   Transaction copyWith({
     String? id,
@@ -26,7 +24,7 @@ class Transaction {
     String? categoryId,
     DateTime? date,
     String? description,
-    String? jarId,
+    String? goalId,
   }) {
     return Transaction(
       id: id ?? this.id,
@@ -34,7 +32,7 @@ class Transaction {
       categoryId: categoryId ?? this.categoryId,
       date: date ?? this.date,
       description: description ?? this.description,
-      jarId: jarId ?? this.jarId,
+      goalId: goalId ?? this.goalId,
     );
   }
 
@@ -48,7 +46,7 @@ class Transaction {
           categoryId == other.categoryId &&
           date == other.date &&
           description == other.description &&
-          jarId == other.jarId;
+          goalId == other.goalId;
 
   @override
   int get hashCode =>
@@ -57,7 +55,7 @@ class Transaction {
       categoryId.hashCode ^
       date.hashCode ^
       description.hashCode ^
-      jarId.hashCode;
+      goalId.hashCode;
 
   Map<String, dynamic> toMap() {
     return {
@@ -66,7 +64,7 @@ class Transaction {
       'categoryId': categoryId,
       'date': date.toIso8601String(),
       'description': description,
-      'jarId': jarId,
+      'goalId': goalId,
     };
   }
 
@@ -77,7 +75,7 @@ class Transaction {
       categoryId: map['categoryId'],
       date: DateTime.parse(map['date']),
       description: map['description'],
-      jarId: map['jarId'],
+      goalId: map['goalId'],
     );
   }
 }

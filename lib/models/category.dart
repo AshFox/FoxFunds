@@ -25,6 +25,22 @@ class Category {
 
   @override
   int get hashCode => id.hashCode ^ name.hashCode ^ type.hashCode;
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'type': type == CategoryType.income ? 0 : 1,
+    };
+  }
+
+  factory Category.fromMap(Map<String, dynamic> map) {
+    return Category(
+      id: map['id'] as String,
+      name: map['name'] as String,
+      type: (map['type'] as int) == 0 ? CategoryType.income : CategoryType.expense,
+    );
+  }
 }
 
 final List<Category> predefinedCategories = [
@@ -34,7 +50,7 @@ final List<Category> predefinedCategories = [
   const Category(
       id: 'investment', name: 'Investment', type: CategoryType.income),
   const Category(id: 'gifts_in', name: 'Gifts', type: CategoryType.income),
-
+  const Category(id: 'goal_contribution', name: 'Goal Contribution', type: CategoryType.expense),
   // Expenses
   const Category(id: 'rent', name: 'Rent', type: CategoryType.expense),
   const Category(id: 'utilities', name: 'Utilities', type: CategoryType.expense),
@@ -48,8 +64,4 @@ final List<Category> predefinedCategories = [
   const Category(
       id: 'subscriptions', name: 'Subscriptions', type: CategoryType.expense),
   const Category(id: 'other_expense', name: 'Other', type: CategoryType.expense),
-  const Category(
-      id: 'jar_contribution',
-      name: 'Jar Contribution',
-      type: CategoryType.expense),
 ];

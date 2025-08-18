@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 
 @immutable
-class Jar {
-  const Jar({
+class Goal {
+  const Goal({
     required this.id,
     required this.name,
     this.targetAmount = 0,
@@ -14,13 +14,13 @@ class Jar {
   final double targetAmount;
   final double currentAmount;
 
-  Jar copyWith({
+  Goal copyWith({
     String? id,
     String? name,
     double? targetAmount,
     double? currentAmount,
   }) {
-    return Jar(
+    return Goal(
       id: id ?? this.id,
       name: name ?? this.name,
       targetAmount: targetAmount ?? this.targetAmount,
@@ -31,7 +31,7 @@ class Jar {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is Jar &&
+      other is Goal &&
           runtimeType == other.runtimeType &&
           id == other.id &&
           name == other.name &&
@@ -54,8 +54,8 @@ class Jar {
     };
   }
 
-  factory Jar.fromMap(Map<String, dynamic> map) {
-    return Jar(
+  factory Goal.fromMap(Map<String, dynamic> map) {
+    return Goal(
       id: map['id'],
       name: map['name'],
       targetAmount: (map['targetAmount'] as num).toDouble(),

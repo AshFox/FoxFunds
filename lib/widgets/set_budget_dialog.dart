@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:foxfunds/models/budget.dart';
 import 'package:foxfunds/models/category.dart';
 import 'package:foxfunds/services/database_service.dart';
+import 'package:foxfunds/services/settings_service.dart';
 
 class SetBudgetDialog extends StatefulWidget {
   final Budget? activeBudget;
@@ -17,6 +18,8 @@ class _SetBudgetDialogState extends State<SetBudgetDialog> {
   late final TextEditingController _amountController;
   late String _duration;
   String? _selectedCategoryId;
+  List<Category> _liveCategories = []; // Add live categories
+  bool _loading = true;
 
   @override
   void initState() {
@@ -25,6 +28,21 @@ class _SetBudgetDialogState extends State<SetBudgetDialog> {
         text: widget.activeBudget?.amount.round().toString() ?? '');
     _duration = widget.activeBudget?.duration ?? 'weekly';
     _selectedCategoryId = widget.activeBudget?.categoryId;
+    _loadCategories(); // Load live categories
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      final categories = await DatabaseService.instance.getAllCategories();
+      setState(() {
+        _liveCategories = categories;
+        _loading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _loading = false;
+      });
+    }
   }
 
   @override
@@ -70,7 +88,7 @@ class _SetBudgetDialogState extends State<SetBudgetDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final expenseCategories = predefinedCategories
+    final expenseCategories = _liveCategories
         .where((cat) => cat.type == CategoryType.expense)
         .toList();
 
@@ -81,35 +99,37 @@ class _SetBudgetDialogState extends State<SetBudgetDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            DropdownButtonFormField<String>(
-              value: _selectedCategoryId,
-              hint: const Text('For All Expenses (Optional)'),
-              isExpanded: true,
-              items: [
-                const DropdownMenuItem<String>(
-                  value: null,
-                  child: Text('All Expenses'),
+            _loading 
+              ? const CircularProgressIndicator()
+              : DropdownButtonFormField<String>(
+                  value: _selectedCategoryId,
+                  hint: const Text('For All Expenses (Optional)'),
+                  isExpanded: true,
+                  items: [
+                    const DropdownMenuItem<String>(
+                      value: null,
+                      child: Text('All Expenses'),
+                    ),
+                    ...expenseCategories.map((Category category) {
+                      return DropdownMenuItem<String>(
+                        value: category.id,
+                        child: Text(category.name),
+                      );
+                    }).toList(),
+                  ],
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _selectedCategoryId = newValue;
+                    });
+                  },
                 ),
-                ...expenseCategories.map((Category category) {
-                  return DropdownMenuItem<String>(
-                    value: category.id,
-                    child: Text(category.name),
-                  );
-                }).toList(),
-              ],
-              onChanged: (String? newValue) {
-                setState(() {
-                  _selectedCategoryId = newValue;
-                });
-              },
-            ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _amountController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Budget Amount',
-                prefixText: 'LYD '
+                prefixText: '${SettingsService.instance.currencySymbol} '
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -123,17 +143,37 @@ class _SetBudgetDialogState extends State<SetBudgetDialog> {
               },
             ),
             const SizedBox(height: 24),
-            SegmentedButton<String>(
-              segments: const [
-                ButtonSegment(value: 'weekly', label: Text('Weekly')),
-                ButtonSegment(value: 'monthly', label: Text('Monthly')),
-              ],
-              selected: {_duration},
-              onSelectionChanged: (newSelection) {
-                setState(() {
-                  _duration = newSelection.first;
-                });
-              },
+            Center(
+              child: SizedBox(
+                width: 300,
+              child: SegmentedButton<String>(
+                segments: const [
+                  ButtonSegment(value: 'weekly', label: Text('Weekly')),
+                  ButtonSegment(value: 'monthly', label: Text('Monthly')),
+                ],
+                selected: {_duration},
+                onSelectionChanged: (newSelection) {
+                  setState(() {
+                    _duration = newSelection.first;
+                  });
+                },
+                showSelectedIcon: false,
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.resolveWith<Color?>((states) {
+                    if (states.contains(MaterialState.selected)) {
+                      return Theme.of(context).colorScheme.primary.withOpacity(0.15);
+                    }
+                    return null;
+                  }),
+                  foregroundColor: MaterialStateProperty.resolveWith<Color?>((states) {
+                    if (states.contains(MaterialState.selected)) {
+                      return Theme.of(context).colorScheme.primary;
+                    }
+                    return null;
+                  }),
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -169,4 +209,4 @@ class _SetBudgetDialogState extends State<SetBudgetDialog> {
       ],
     );
   }
-} 
+}
